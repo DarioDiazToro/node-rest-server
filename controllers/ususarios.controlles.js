@@ -32,10 +32,9 @@
 
     const usuario = new Usuario({nombre,password,role,correo});
 
-
-    //Encriptar la contraseña
+   //  Encriptar la contraseña
     const salt = bcryptjs.genSaltSync();
-    usuario.password = bcryptjs.hashSync(salt);
+    usuario.password = bcryptjs.hashSync(password,salt);
 
     //Guardar en DB
     await usuario.save();
@@ -49,7 +48,9 @@
  const usuariosDelete=async(req,res = response)=>{
     const { id } = req.params;
     const usuario = await Usuario.findByIdAndUpdate(id,{estado:false});
-    res.json(usuario);
+    
+    const ususarioAuntenticado = req.usuario;
+    res.json({usuario,ususarioAuntenticado});
  };
  
  const usuariosPatch=(req,res = response)=>{

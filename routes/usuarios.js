@@ -1,23 +1,28 @@
 const { Router } = require('express');
 const { check} = require('express-validator');
 const router = Router();
-const { validarDatos, } = require('../middlewares/validaciones');
 const { esRolValido, emailExist, existIdPorUsuario,} = require('../helpers/db-validations');
+const { validationFields } = require('../helpers/validation-fields-query');
+
+const {
+   tieneRole,
+   validarJwt,
+   validarDatos
+} = require('../middlewares');
+
 const { usuariosGet, 
        usuariosDelete, 
        usuariosPost,
        usuariosPatch, 
        usuariosPut
      } = require('../controllers/ususarios.controlles');
-const { validationField } = require('../helpers/validation-fields-query');
-
 
  router.get('', [
     check('limite').custom (async(limite)=>{
-       await validationField(limite);
+       await validationFields(limite);
     }),
     check('desde').custom(async(desde)=>{
-       await validationField(desde);
+       await validationFields(desde);
     }),
      validarDatos,
  ], usuariosGet);
@@ -31,7 +36,11 @@ const { validationField } = require('../helpers/validation-fields-query');
       validarDatos
  ],usuariosPost);
 
+
  router.delete('/:id',[
+    validarJwt,
+   //  esAdminRole,
+    tieneRole('ADMIN_ROLE','VENTAS_ROLE','NOSE_ROL'),
     check('id','no es un id valido para mongo DB').isMongoId(),
     check('id').custom(existIdPorUsuario),
     validarDatos
